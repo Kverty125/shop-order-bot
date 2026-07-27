@@ -12,8 +12,8 @@ from telebot import types
 from flask import Flask
 from pymongo import MongoClient
 
-TOKEN = "8967848819:AAEoy23NSIYQR2ne7efvPLJ3CuWg4kyKewI"
-ADMIN_PASSWORD = "mirrexworkforyou"
+TOKEN = "8967848819:AAGzCCocLF2iIjK-gbfljCc7BVWy3Y4q4og"
+ADMIN_PASSWORD = "zelixbyste"
 MONGO_URL = "mongodb+srv://chernovfedor784_db_user:cSZDTtyFCuVbC2NR@cluster0.a8gt5bk.mongodb.net/?retryWrites=true&w=majority"
 
 # ========== MONGODB ==========
@@ -21,9 +21,10 @@ if MONGO_URL:
     try:
         mongo_client = MongoClient(
             MONGO_URL,
-            serverSelectionTimeoutMS=5000,
+            serverSelectionTimeoutMS=10000,
             tls=True,
             tlsAllowInvalidCertificates=True,
+            connect=False
         )
         mongo_client.admin.command("ping")
         db = mongo_client["telegram_bot"]
@@ -39,12 +40,6 @@ if MONGO_URL:
 else:
     USING_MONGO = False
     print("⚠️ MongoDB не настроен")
-
-logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    level=logging.INFO,
-)
-
 bot = telebot.TeleBot(TOKEN)
 
 # ========== FLASK ДЛЯ RENDER ==========
