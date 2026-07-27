@@ -12,11 +12,11 @@ from telebot import types
 from flask import Flask
 from pymongo import MongoClient
 
-TOKEN = os.getenv("TG_BOT_TOKEN", "8967848819:AAFH6aCSmRXL2Rdc-NBp37CUAj-e-x4DmNg")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "mirrexworkforyou")
+TOKEN = "8967848819:AAEoy23NSIYQR2ne7efvPLJ3CuWg4kyKewI"
+ADMIN_PASSWORD = "mirrexworkforyou"
+MONGO_URL = "mongodb+srv://chernovfedor784_db_user:cSZDTtyFCuVbC2NR@cluster0.a8gt5bk.mongodb.net/?retryWrites=true&w=majority"
 
 # ========== MONGODB ==========
-MONGO_URL = os.getenv("MONGO_URL")
 if MONGO_URL:
     try:
         mongo_client = MongoClient(
@@ -79,7 +79,6 @@ BANNED_USERS = set()
 PENDING_ORDERS = {}
 ADMIN_LOGIN_PENDING = set()
 
-# Simple per-user rate limiter: allow one message per 2 seconds
 LAST_MESSAGE_TS = {}
 RATE_LIMIT_SECONDS = 2
 
@@ -310,7 +309,6 @@ def set_default_commands():
         telebot.types.BotCommand("help", "Показать справку"),
         telebot.types.BotCommand("orders", "Показать мои заказы"),
         telebot.types.BotCommand("support", "Связаться с поддержкой"),
-        # админ-команда не добавляется в публичный список
     ]
     try:
         bot.set_my_commands(commands)
@@ -375,7 +373,6 @@ def get_user_menu():
 
 
 def get_pending_order_keyboard():
-    # kept for compatibility, but prefer get_pending_order_keyboard_for(owner_id)
     markup = types.InlineKeyboardMarkup(row_width=1)
     markup.add(types.InlineKeyboardButton("❌ Отменить заказ", callback_data="cancel_pending"))
     return markup
@@ -807,14 +804,11 @@ def admin_users(message):
 
 
 # ===== Обработка сообщений =====
-# Handle text and common media so order-creation media is processed here
 @bot.message_handler(content_types=['text','photo','document','video','animation','sticker','voice','video_note'])
 def handle_messages(message):
     user_id = str(message.from_user.id)
 
-    # Anti-spam: ignore messages sent too fast by the same user
     if is_rate_limited(user_id):
-        # allow sending media while user is in order 'await_data' stage
         pending = PENDING_ORDERS.get(user_id)
         if not (pending and pending.get("stage") == "await_data"):
             return
@@ -893,7 +887,6 @@ def handle_messages(message):
                 photo_id = message.animation.file_id
                 user_data_text = message.caption or "🎞 Анимация"
 
-            # Accumulate data and attachments; ask user to add more or finalize
             pending.setdefault("data", "")
             pending.setdefault("attachments", [])
             if pending["data"]:
@@ -1176,7 +1169,6 @@ def handle_callbacks(call):
 
     if data.startswith("confirm_pending"):
         parts = data.split(":", 1)
-        # require owner in callback_data to avoid other users pressing buttons
         if len(parts) == 1 and user_id not in ADMIN_IDS:
             bot.answer_callback_query(call.id, "❌ Эта кнопка не для вас")
             return
@@ -1193,7 +1185,6 @@ def handle_callbacks(call):
             pending = PENDING_ORDERS.pop(user_id, None)
 
         if not pending:
-            # fallback: try to parse order preview from the message (in case pending lost)
             msg_text = call.message.caption or call.message.text or ""
             svc = None
             price = None
@@ -1227,7 +1218,6 @@ def handle_callbacks(call):
                     "photo_id": photo_id,
                 }
             else:
-                # try looser heuristics: look for known category names or lines with '—'
                 lines = [l.strip() for l in msg_text.splitlines() if l.strip()]
                 for line in lines:
                     if '—' in line or any(v in line for v in CATEGORY_NAMES.values()):
@@ -1246,7 +1236,6 @@ def handle_callbacks(call):
                     }
 
             if not pending:
-                # debug: log and send alert to help diagnose missing pending
                 print(f"Confirm fallback failed. call.data={data} msg_len={len(msg_text)}")
                 try:
                     bot.answer_callback_query(call.id, f"❌ Нет активного заказа для подтверждения (DBG)", show_alert=True)
@@ -1287,7 +1276,6 @@ def handle_callbacks(call):
             "Ваш заказ успешно создан. Чтобы открыть чат с админом, перейдите в '🛒 Мои заказы', откройте нужный заказ и нажмите '💬 Чат по заказу'.",
             reply_markup=get_user_menu(),
         )
-        # дополнительное уведомление о дальнейших шагах оплаты
         try:
             bot.send_message(call.message.chat.id, "Финальная часть оформления заказа прошла. По поводу оплаты с вами свяжется наш менеджер.")
         except Exception:
@@ -1310,7 +1298,6 @@ def handle_callbacks(call):
             return
 
         owner = str(owner)
-        # try to remove owner's pending, fallback to caller
         if owner in PENDING_ORDERS:
             PENDING_ORDERS.pop(owner, None)
         else:
@@ -1535,9 +1522,7 @@ def run_bot():
     while True:
         try:
             logging.info("Бот запущен")
-            if ADMIN_PASSWORD == "mirrexworkforyou":
-                logging.warning("Используется пароль администратора по умолчанию. Рекомендуется установить переменную ADMIN_PASSWORD.")
-            bot.remove_webhook()
+            # bot.remove_webhook()
             bot.infinity_polling(timeout=60, long_polling_timeout=30)
         except Exception as e:
             logging.exception("Ошибка при работе бота")
