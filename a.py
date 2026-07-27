@@ -12,7 +12,7 @@ from telebot import types
 from flask import Flask
 from pymongo import MongoClient
 
-TOKEN = "8967848819:AAHg0tjihni6x9kEYhasNOlzcWVUh2n3X40"
+TOKEN = "8967848819:AAFmDNH1AujOfuR4MO-VzCjxScI41VCMpXM"
 ADMIN_PASSWORD = "zelixbyste"
 MONGO_URL = "mongodb+srv://chernovfedor784_db_user:TelegramBot2026@cluster0.a8gt5bk.mongodb.net/?retryWrites=true&w=majority"
 
