@@ -14,7 +14,7 @@ from pymongo import MongoClient
 
 TOKEN = "8967848819:AAGzCCocLF2iIjK-gbfljCc7BVWy3Y4q4og"
 ADMIN_PASSWORD = "zelixbyste"
-MONGO_URL = "mongodb+srv://chernovfedor784_db_user:cSZDTtyFCuVbC2NR@cluster0.a8gt5bk.mongodb.net/?retryWrites=true&w=majority"
+MONGO_URL = "mongodb+srv://chernovfedor784_db_user:TelegramBot2026@cluster0.a8gt5bk.mongodb.net/?retryWrites=true&w=majority"
 
 # ========== MONGODB ==========
 if MONGO_URL:
