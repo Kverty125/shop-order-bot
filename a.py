@@ -17,14 +17,14 @@ ADMIN_PASSWORD = "zelixbyste"
 MONGO_URL = "mongodb+srv://chernovfedor784_db_user:TelegramBot2026@cluster0.a8gt5bk.mongodb.net/?retryWrites=true&w=majority"
 
 # ========== MONGODB ==========
+import certifi
 if MONGO_URL:
     try:
         mongo_client = MongoClient(
             MONGO_URL,
             serverSelectionTimeoutMS=10000,
             tls=True,
-            tlsAllowInvalidCertificates=True,
-            connect=False
+            tlsCAFile=certifi.where()
         )
         mongo_client.admin.command("ping")
         db = mongo_client["telegram_bot"]
