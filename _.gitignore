@@ -1,0 +1,5 @@
+.env
+shop_data.json
+*.tmp
+__pycache__/
+.venv/
